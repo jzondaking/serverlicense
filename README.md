@@ -2,8 +2,10 @@
 
 Có đầy đủ tài liệu API tích hợp, quản lý giấy phép, khách hàng linh hoạt. Có cấu hình thời hạn giấy phép theo thời gian.
 
-> 🚫 Cấm thương mại mã nguồn miễn phí dưới mọi hình thức!
-> 🤩 Có sẵn trang cấu hình database khi phát hiện DB_DATABASE và DB_USERNAME chưa cấu hình.
+``` 
+🚫 Cấm thương mại mã nguồn miễn phí dưới mọi hình thức!
+🤩 Có sẵn trang cấu hình database khi phát hiện DB_DATABASE và DB_USERNAME chưa cấu hình.
+```
 
 ## Installation
 
