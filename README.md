@@ -71,6 +71,16 @@ php artisan key:generate
 
 ```
 
+Create public storage symbol link:
+
+  
+
+```sh
+
+php artisan storage:link
+
+```
+
   
 
 Create an MySQL database & Run database migrations:
