@@ -8,11 +8,8 @@ Có đầy đủ tài liệu API tích hợp, quản lý giấy phép, khách h�
   
 
 ```
-
 🚫 Cấm thương mại mã nguồn miễn phí dưới mọi hình thức!
-
 🤩 Có sẵn trang cấu hình database khi phát hiện DB_DATABASE và DB_USERNAME chưa cấu hình.
-
 ```
 
    - [Installation](#installation)
