@@ -14,18 +14,16 @@ class LicenseController extends Controller
     
     public function index(Request $request)
     {
-        $row = $request->query('row') ?? 15;
+        $row = $request->input('row') ?? 15;
 
-        if ($request->query('s')) {
-            $licenses = License::where('id', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('customer', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('product', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('product_id', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('key', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('duration', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('fingerprint', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('activated_at', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('created_at', 'LIKE', '%'.$request->query('s').'%')->
+        if ($request->input('s')) {
+            $licenses = License::where('customer', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('product', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('key', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('duration', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('fingerprint', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('activated_at', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('created_at', 'LIKE', '%'.$request->input('s').'%')->
             orderBy('id', 'desc')->paginate($row);
         } else {
             $licenses = License::orderBy('id', 'desc')->paginate($row);

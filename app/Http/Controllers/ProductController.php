@@ -13,12 +13,11 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $row = $request->query('row') ?? 5;
+        $row = $request->input('row') ?? 5;
 
-        if ($request->query('s')) {
-            $products = Product::where('id', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('name', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('description', 'LIKE', '%'.$request->query('s').'%')->
+        if ($request->input('s')) {
+            $products = Product::where('name', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('description', 'LIKE', '%'.$request->input('s').'%')->
             orderBy('id', 'desc')->paginate($row);
         } else {
             $products = Product::orderBy('id', 'desc')->paginate($row);

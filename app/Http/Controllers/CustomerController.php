@@ -13,18 +13,16 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-        $row = $request->query('row') ?? 10;
+        $row = $request->input('row') ?? 10;
 
-        if ($request->query('s')) {
-            $customers = Customer::where('id', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('fullname', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('gender', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('dob', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('phone', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('email', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('note', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('created_at', 'LIKE', '%'.$request->query('s').'%')->
-            orWhere('updated_at', 'LIKE', '%'.$request->query('s').'%')->
+        if ($request->input('s')) {
+            $customers = Customer::where('fullname', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('gender', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('dob', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('phone', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('email', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('note', 'LIKE', '%'.$request->input('s').'%')->
+            orWhere('created_at', 'LIKE', '%'.$request->input('s').'%')->
             orderBy('id', 'desc')->paginate($row);
         } else {
             $customers = Customer::orderBy('id', 'desc')->paginate($row);
