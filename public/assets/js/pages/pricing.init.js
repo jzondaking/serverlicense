@@ -1,0 +1,1 @@
+function check(){for(var e=document.getElementById("checbox"),t=document.getElementsByClassName("text1"),c=document.getElementsByClassName("text2"),l=0;l<t.length;l++)1==e.checked?(t[l].style.display="block",c[l].style.display="none"):0==e.checked&&(t[l].style.display="none",c[l].style.display="block")}check();

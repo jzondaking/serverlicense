@@ -1,0 +1,1 @@
+$(function(){$(".table-responsive").responsiveTable({addDisplayAllBtn:"btn btn-secondary"}),$(".btn-toolbar [data-bs-toggle=dropdown]").attr("data-bs-toggle","dropdown")});
