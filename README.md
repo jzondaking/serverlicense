@@ -4,7 +4,7 @@
 
 
 Có đầy đủ tài liệu API tích hợp, quản lý giấy phép, khách hàng linh hoạt. Có cấu hình thời hạn giấy phép theo thời gian.
-
+- [VIDEO DEMO / HƯỚNG DẪN SỬ DỤNG](https://www.youtube.com/watch?v=Q7xXVTATZ6A)
   
 
 ```
