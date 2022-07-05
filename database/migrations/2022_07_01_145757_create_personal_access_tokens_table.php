@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePersonalAccessTokensTable extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -13,6 +12,8 @@ class CreatePersonalAccessTokensTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('personal_access_tokens')) return;
+
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('tokenable_type');
@@ -36,4 +37,4 @@ class CreatePersonalAccessTokensTable extends Migration
     {
         Schema::dropIfExists('personal_access_tokens');
     }
-}
+};

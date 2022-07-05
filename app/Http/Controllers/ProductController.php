@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Version;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
@@ -13,15 +14,14 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $row = $request->input('row') ?? 5;
+        $params = $request->all();
+        $products = Product::query()->orderByDesc('id');
 
-        if ($request->input('s')) {
-            $products = Product::where('name', 'LIKE', '%'.$request->input('s').'%')->
-            orWhere('description', 'LIKE', '%'.$request->input('s').'%')->
-            orderBy('id', 'desc')->paginate($row);
-        } else {
-            $products = Product::orderBy('id', 'desc')->paginate($row);
-        }
+        search_by_cols($products, $request->input('s'), [
+            'name', 'description', 'id'
+        ]);
+
+        $products = paginate_with_params($products, $params);
 
         return view('products.index', compact('products'));
     }
@@ -36,15 +36,8 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return redirect()->route('product.index')->withInput()->withErrors($validator);
         }
-        
-        if ($request->hasFile('file')) {
-            $file = $request->file;
-            $path = 'public';
-            $filename = md5(time())."_".date('d_m_Y')."_".time().".".$file->extension();
-            $request->file('file')->storeAs($path, $filename, 'local');
-        } else {
-            $filename = null;
-        }
+
+        $filename = $this->uploadFile($request->file('file'), $request);
 
         $product = new Product;
         $product->name = $request->name;
@@ -57,13 +50,13 @@ class ProductController extends Controller
             'product_id' => $product_id,
             'version' => $request->version,
             'description' => (!$request->version_description) ? null : $request->version_description,
-            'file_url' => (!$filename) ? null : '/storage/'.$filename
+            'file_url' => (!$filename) ? null : '/storage/' . $filename
         ]);
 
-        return redirect()->route('product.index')->with('success', 'Thêm sản phẩm "'.$request->name.'" thành công!');
+        return redirect()->route('product.index')->with('success', 'Thêm sản phẩm "' . $request->name . '" thành công!');
     }
 
-    public function delete($id) 
+    public function delete($id)
     {
         Product::where('id', $id)->delete();
         Version::where('product_id', $id)->delete();
@@ -73,16 +66,12 @@ class ProductController extends Controller
 
     public function edit($id)
     {
-        $product = Product::where('id', $id)->first();
+        $product = Product::where('id', $id)->firstOrFail();
 
-        if ($product) {
-            return view('products.edit', compact('product'));
-        } else {
-            return abort(404);
-        }
+        return view('products.edit', compact('product'));
     }
 
-    public function save(Request $request, $id)
+    public function save(Request $request, Product $product)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required'
@@ -92,7 +81,7 @@ class ProductController extends Controller
             return back()->withInput()->withErrors($validator);
         }
 
-        Product::where('id', $id)->update([
+        $product->update([
             'name' => $request->name,
             'description' => (!$request->description) ? null : $request->description,
         ]);
@@ -102,14 +91,10 @@ class ProductController extends Controller
 
     public function version_log($id)
     {
-        $product = Product::where('id', $id)->first();
+        $product = Product::where('id', $id)->firstOrFail();
+        $version_logs = Version::where('product_id', $id)->orderBy('id', 'desc')->paginate(5);
 
-        if ($product) {
-            $version_logs = Version::where('product_id', $id)->orderBy('id', 'desc')->paginate(5); 
-            return view('products.version_log', compact('version_logs', 'product'));
-        } else {
-            return abort(404);
-        }
+        return view('products.version_log', compact('version_logs', 'product'));
     }
 
     public function addVersion(Request $request, $id)
@@ -121,35 +106,24 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return back()->withInput()->withErrors($validator);
         }
-        
-        if ($request->hasFile('file')) {
-            $file = $request->file;
-            $path = 'public';
-            $filename = md5(time())."_".date('d_m_Y')."_".time().".".$file->extension();
-            $request->file('file')->storeAs($path, $filename, 'local');
-        } else {
-            $filename = null;
-        }
+
+        $filename = $this->uploadFile($request->file('file'), $request);
 
         Version::insert([
             'product_id' => $id,
             'version' => $request->version,
             'description' => (!$request->description) ? null : $request->description,
-            'file_url' => (!$filename) ? null : '/storage/'.$filename
+            'file_url' => (!$filename) ? null : '/storage/' . $filename
         ]);
 
-        return back()->with('success', 'Thêm phiên bản mới "'.$request->version.'" thành công!');
+        return back()->with('success', 'Thêm phiên bản mới "' . $request->version . '" thành công!');
     }
 
     public function editVersion($id)
     {
-        $version = Version::where('id', $id)->first();
+        $version = Version::where('id', $id)->firstOrFail();
 
-        if ($version) {
-            return view('products.version_edit', compact('version'));
-        } else {
-            return abort(404);
-        }
+        return view('products.version_edit', compact('version'));
     }
 
     public function deleteVersion($id)
@@ -167,15 +141,8 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return back()->withInput()->withErrors($validator);
         }
-        
-        if ($request->hasFile('file')) {
-            $file = $request->file;
-            $path = 'public';
-            $filename = md5(time())."_".date('d_m_Y')."_".time().".".$file->extension();
-            $request->file('file')->storeAs($path, $filename, 'local');
-        } else {
-            $filename = null;
-        }
+
+        $filename = $this->uploadFile($request->file('file'), $request);
 
         if (!$filename) {
             Version::where('id', $id)->update([
@@ -186,10 +153,21 @@ class ProductController extends Controller
             Version::where('id', $id)->update([
                 'version' => $request->version,
                 'description' => (!$request->description) ? null : $request->description,
-                'file_url' => '/storage/'.$filename
+                'file_url' => '/storage/' . $filename
             ]);
         }
 
         return back()->with('success', 'Đã lưu thay đổi thông tin phiên bản!');
+    }
+
+    private function uploadFile(?UploadedFile $file, Request $request): ?string
+    {
+        if (!$file) return null;
+
+        $path = 'public';
+        $filename = md5(time()) . "_" . date('d_m_Y') . "_" . time() . "." . $file->extension();
+        $request->file('file')->storeAs($path, $filename, 'local');
+
+        return $filename;
     }
 }

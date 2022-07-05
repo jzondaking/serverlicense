@@ -13,7 +13,7 @@ class AuthController extends Controller
 {
     //
 
-    public function viewLogin() 
+    public function viewLogin()
     {
         return view('auth.login');
     }
@@ -25,7 +25,7 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|min:5'
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->route('auth.login')->withInput()->withErrors($validator);
         }
@@ -33,17 +33,11 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
         $auth = Auth::attempt($credentials, $request->has('remember'));
 
-        if ($auth) {
-         
-            return redirect()->route('dashboard.index')->with('success', 'Đăng nhập thành công! Chào mừng quay trở lại ^^');
-        
-        } else {
-
-            return redirect()->route('auth.login')->withInput()->withErrors([
+        return $auth
+            ? redirect()->route('dashboard.index')->with('success', 'Đăng nhập thành công! Chào mừng quay trở lại ^^')
+            : redirect()->route('auth.login')->withInput()->withErrors([
                 "Email hoặc mật khẩu không đúng."
             ]);
-
-        }
     }
 
     public function doLogout()
@@ -70,19 +64,19 @@ class AuthController extends Controller
             return redirect()->route('auth.change_pwd')->withInput()->withErrors($validator);
         }
 
-        if (Hash::check($request->old, Auth::user()->password)) {
+        $user = auth()->user();
 
-            User::whereId(Auth::user()->id)->update([
-                'password' => Hash::make($request->new)
-            ]);
-
-            return redirect()->route('auth.change_pwd')->with('success', 'Đổi mật khẩu thành công!');
-
-        } else {
+        if (!Hash::check($request->old, $user->password)) {
             return redirect()->route('auth.change_pwd')->withInput()->withErrors([
                 'Mật khẩu cũ không hợp lệ!'
             ]);
         }
+
+        $user->update([
+            'password' => Hash::make($request->new)
+        ]);
+
+        return redirect()->route('auth.change_pwd')->with('success', 'Đổi mật khẩu thành công!');
     }
 
 }
