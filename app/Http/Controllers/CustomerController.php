@@ -93,7 +93,7 @@ class CustomerController extends Controller
             ]);
     }
 
-    public function save(Request $request, Customer $customer)
+    public function save(Request $request, Customer $customer, License $license)
     {
         $validator = Validator::make($request->all(), $this->rules);
 
