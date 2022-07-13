@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\License;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -118,6 +119,14 @@ class CustomerController extends Controller
             "email" => (empty($request->email)) ? NULL : $request->email,
             "note" => (empty($request->note)) ? NULL : $request->note
         ]);
+
+        foreach (License::all() as $ls) {
+            $data = json_decode($ls['customer'], true);
+
+            if ($data['id'] == $id) {
+                License::where('id', $ls['id'])->update(Customer::where('id', $id)->first());
+            }
+        }
 
         return redirect()->route('customer.index')->with('success', 'Lưu thông tin khách hàng "'.$request->fullname.'" thành công!');
     }
