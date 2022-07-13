@@ -19,46 +19,105 @@ use App\Http\Controllers\SetupController;
 |
 */
 
-Route::post('/save-setup', [ SetupController::class, 'saveSetup' ])->name('save_setup');
+Route::post('/save-setup', [SetupController::class, 'saveSetup'])->name('save_setup');
 
-Route::middleware([ 'app' ])->group(function() {
-    Route::middleware([ 'guest' ])->group(function() {
-        Route::get('/login', [ AuthController::class, 'viewLogin' ])->name('auth.login');
-        Route::post('/login', [ AuthController::class, 'doLogin' ])->name('auth.doLogin');
+Route::middleware(['app'])->group(function () {
+    Route::middleware(['guest'])->group(function () {
+        Route::get('/login', [AuthController::class, 'viewLogin'])->name('auth.login');
+        Route::post('/login', [AuthController::class, 'doLogin'])->name('auth.doLogin');
     });
 
-    Route::middleware([ 'auth' ])->group(function() {
-        Route::get('/logout', [ AuthController::class, 'doLogout' ])->name('auth.logout');
-        Route::get('/change-password', [ AuthController::class, 'viewChangePwd' ])->name('auth.change_pwd');
-        Route::post('/change-password', [ AuthController::class, 'doChangePwd' ])->middleware('protect')->name('auth.do_change_pwd');
+    Route::middleware(['auth'])->group(function () {
 
-        Route::get('/', [ DashboardController::class, 'index' ])->name('dashboard.index');
+        Route::group([
+            'as' => 'auth.',
+            'controller' => AuthController::class,
+        ], function () {
+            Route::get('/logout', 'doLogout')->name('logout');
+            Route::get('/change-password', 'viewChangePwd')->name('change_pwd');
+            Route::post('/change-password', 'doChangePwd')
+                ->middleware('protect')
+                ->name('do_change_pwd');
+        });
 
-        Route::get('/customers', [ CustomerController::class, 'index' ])->name('customer.index');
-        Route::get('/customers/add', [ CustomerController::class, 'viewAdd' ])->name('customer.add');
-        Route::post('/customers/add', [ CustomerController::class, 'doAdd' ])->middleware('protect')->name('customer.add');
-        Route::get('/customer/{id}', [ CustomerController::class, 'customerProfile' ])->name('customer.profile');
-        Route::get('/customer/{id}/delete', [ CustomerController::class, 'delete' ])->middleware('protect')->name('customer.delete');
-        Route::get('/customer/{id}/edit', [ CustomerController::class, 'edit' ])->name('customer.edit');
-        Route::post('/customer/{id}/save', [ CustomerController::class, 'save' ])->middleware('protect')->name('customer.save');
-    
-        Route::get('/products', [ ProductController::class, 'index' ])->name('product.index');
-        Route::post('/products', [ ProductController::class, 'addProduct' ])->middleware('protect')->name('product.add');
-        Route::get('/product/{id}', [ ProductController::class, 'edit' ])->name('product.edit');
-        Route::get('/product/{id}/delete', [ ProductController::class, 'delete' ])->middleware('protect')->name('product.delete');
-        Route::post('/product/{id}/save', [ ProductController::class, 'save' ])->middleware('protect')->name('product.save');
-        
-        Route::get('/product/version-log/{id}', [ ProductController::class, 'version_log' ])->name('product.version_log');
-        Route::post('/product/version-log/{id}', [ ProductController::class, 'addVersion' ])->middleware('protect')->name('product.version.add');
-        Route::get('/product/version-log/{id}/edit', [ ProductController::class, 'editVersion' ])->name('product.version.edit');
-        Route::get('/product/version-log/{id}/delete', [ ProductController::class, 'deleteVersion' ])->middleware('protect')->name('product.version.delete');
-        Route::get('/product/version-log/{id}/save', [ ProductController::class, 'saveVersion' ])->middleware('protect')->name('product.version.save');
-    
-        Route::get('/licenses', [ LicenseController::class, 'index' ])->name('license.index');
-        Route::get('/license/add', [ LicenseController::class, 'viewAdd' ])->name('license.add');
-        Route::post('/license/add', [ LicenseController::class, 'doAdd' ])->name('license.do_add');
-        Route::get('/license/{id}/edit', [ LicenseController::class, 'edit' ])->name('license.edit');
-        Route::post('/license/{id}/save', [ LicenseController::class, 'save' ])->name('license.save');
-        Route::get('/license/{id}/delete', [ LicenseController::class, 'delete' ])->name('license.delete');
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+
+        Route::group([
+            'as' => 'customer.',
+            'controller' => CustomerController::class
+        ], function () {
+
+            Route::group(['prefix' => 'customers',], function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('add', 'viewAdd')->name('add');
+                Route::post('add', 'doAdd')
+                    ->middleware('protect')
+                    ->name('add');
+            });
+
+            Route::group(['prefix' => 'customer'], function () {
+                Route::get('{id}', 'customerProfile')->name('profile');
+                Route::get('{id}/delete', 'delete')
+                    ->middleware('protect')
+                    ->name('delete');
+                Route::get('{customer}/edit', 'edit')->name('edit');
+                Route::post('{customer}/save', 'save')
+                    ->middleware('protect')
+                    ->name('save');
+            });
+
+        });
+
+        Route::group([
+            'as' => 'product.',
+            'controller' => ProductController::class
+        ], function () {
+
+            Route::group(['prefix' => 'products'], function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/', 'addProduct')
+                    ->middleware('protect')
+                    ->name('add');
+            });
+
+            Route::group([
+                'prefix' => 'product'
+            ], function () {
+                Route::get('{product}', 'edit')->name('edit');
+                Route::get('{product}/delete', 'delete')
+                    ->middleware('protect')
+                    ->name('delete');
+                Route::post('{product}/save', 'save')
+                    ->middleware('protect')
+                    ->name('save');
+                Route::get('version-log/{id}', 'version_log')->name('version_log');
+                Route::post('version-log/{id}', 'addVersion')
+                    ->middleware('protect')
+                    ->name('version.add');
+                Route::get('version-log/{id}/edit', 'editVersion')->name('version.edit');
+                Route::get('version-log/{id}/delete', 'deleteVersion')
+                    ->middleware('protect')
+                    ->name('version.delete');
+                Route::get('version-log/{id}/save', 'saveVersion')
+                    ->middleware('protect')
+                    ->name('version.save');
+            });
+        });
+
+        Route::group([
+            'prefix' => 'licenses',
+            'as' => 'license.',
+            'controller' => LicenseController::class
+        ], function () {
+
+            Route::get('/', 'index')->name('index');
+            Route::get('add', 'viewAdd')->name('add');
+            Route::post('add', 'doAdd')->name('do_add');
+            Route::get('{id}/edit', 'edit')->name('edit');
+            Route::post('{id}/save', 'save')->name('save');
+            Route::get('{id}/delete', 'delete')->name('delete');
+
+        });
+
     });
 });

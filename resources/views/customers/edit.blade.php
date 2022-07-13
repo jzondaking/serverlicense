@@ -38,7 +38,7 @@
                         <div class="col-lg-6">
                             <div class="form-group mb-3">
                                 <label for="">Ngày sinh / Sinh nhật:</label>
-                                <input id="datepicker" placeholder="d/m/Y" value="{{ (!$customer['dob']) ? '' : Carbon\Carbon::parse($customer['dob'])->format('d/m/Y') }}" />
+                                <input id="datepicker" placeholder="d/m/Y" name="dob" value="{{ (!$customer['dob']) ? '' : Carbon\Carbon::parse($customer['dob'])->format('d/m/Y') }}" />
                             </div>
 
                             <script>
