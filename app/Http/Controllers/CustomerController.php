@@ -98,7 +98,7 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), $this->rules);
 
         if ($validator->fails()) {
-            return redirect()->route('customer.edit')->withErrors($validator);
+            return back()->withErrors($validator);
         }
 
         $data = $validator->validated();
